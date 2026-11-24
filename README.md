@@ -245,7 +245,7 @@ Key endpoints (all through the gateway; `Authorization: Bearer <access>` unless 
 ## Design decisions & trade-offs
 
 Study-friendly summary: [`docs/architectural-decisions.md`](docs/architectural-decisions.md).
-Full records in [`docs/adr/`](docs/adr/). Highlights:
+Highlights:
 
 - **Kafka over Redis Pub/Sub** — per-conversation ordering (partition key), replay for offline sync,
   native DLQ + consumer lag. Redis stays for presence/rate-limits (ephemeral jobs).
