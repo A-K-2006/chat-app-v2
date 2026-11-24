@@ -1,0 +1,108 @@
+{
+  "uid": "relay-k6",
+  "title": "Relay — k6 Load Test",
+  "tags": ["relay", "k6", "loadtest"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": { "from": "now-15m", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Virtual users",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "targets": [
+        { "expr": "k6_vus", "legendFormat": "active VUs", "refId": "A" },
+        { "expr": "k6_vus_max", "legendFormat": "max VUs", "refId": "B" }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Iterations / s",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "ops" }, "overrides": [] },
+      "targets": [
+        { "expr": "sum(rate(k6_iterations_total[1m]))", "legendFormat": "iterations/s", "refId": "A" }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Message throughput (sent / received per s)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "ops" }, "overrides": [] },
+      "targets": [
+        { "expr": "sum(rate(k6_messages_sent_total[1m]))", "legendFormat": "sent/s", "refId": "A" },
+        { "expr": "sum(rate(k6_ws_msgs_received_total[1m]))", "legendFormat": "ws received/s", "refId": "B" },
+        { "expr": "sum(rate(k6_ws_msgs_sent_total[1m]))", "legendFormat": "ws sent/s", "refId": "C" }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Delivery latency (ms, client send → echo)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "ms" }, "overrides": [] },
+      "targets": [
+        { "expr": "k6_delivery_latency_ms_avg", "legendFormat": "avg", "refId": "A" },
+        { "expr": "k6_delivery_latency_ms_p95", "legendFormat": "p95", "refId": "B" },
+        { "expr": "k6_delivery_latency_ms_p99", "legendFormat": "p99", "refId": "C" }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "HTTP request duration (ms)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "ms" }, "overrides": [] },
+      "targets": [
+        { "expr": "k6_http_req_duration_p95", "legendFormat": "p95", "refId": "A" },
+        { "expr": "k6_http_req_duration_p99", "legendFormat": "p99", "refId": "B" }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Error / check rates",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit" }, "overrides": [] },
+      "targets": [
+        { "expr": "k6_http_req_failed_rate", "legendFormat": "http failed", "refId": "A" },
+        { "expr": "k6_ws_errors_rate", "legendFormat": "ws errors", "refId": "B" },
+        { "expr": "k6_checks_rate", "legendFormat": "checks pass", "refId": "C" }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "WebSocket sessions / s",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "ops" }, "overrides": [] },
+      "targets": [
+        { "expr": "sum(rate(k6_ws_sessions_total[1m]))", "legendFormat": "ws sessions/s", "refId": "A" }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "WebSocket connect time p99 (ms)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "ms" }, "overrides": [] },
+      "targets": [
+        { "expr": "k6_ws_connecting_p99", "legendFormat": "ws connect p99", "refId": "A" }
+      ]
+    }
+  ]
+}

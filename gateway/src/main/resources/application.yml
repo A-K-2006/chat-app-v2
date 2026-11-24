@@ -1,0 +1,180 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: false
+          routes:
+            - id: auth-api-docs
+              uri: lb://auth-service
+              predicates:
+                - Path=/auth/v3/api-docs
+              filters:
+                - RewritePath=/auth/v3/api-docs, /v3/api-docs
+            - id: chat-api-docs
+              uri: lb://chat-service
+              predicates:
+                - Path=/chat/v3/api-docs
+              filters:
+                - RewritePath=/chat/v3/api-docs, /v3/api-docs
+            - id: history-api-docs
+              uri: lb://history-service
+              predicates:
+                - Path=/history/v3/api-docs
+              filters:
+                - RewritePath=/history/v3/api-docs, /v3/api-docs
+            - id: presence-api-docs
+              uri: lb://presence-service
+              predicates:
+                - Path=/presence/v3/api-docs
+              filters:
+                - RewritePath=/presence/v3/api-docs, /v3/api-docs
+            - id: auth
+              uri: lb://auth-service
+              predicates:
+                - Path=/auth/**,/users/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    redis-rate-limiter.replenishRate: 20
+                    redis-rate-limiter.burstCapacity: 40
+                    redis-rate-limiter.requestedTokens: 1
+                    key-resolver: "#{@userKeyResolver}"
+                - name: CircuitBreaker
+                  args:
+                    name: authCB
+                    fallbackUri: forward:/fallback
+            - id: chat-api
+              uri: lb://chat-service
+              predicates:
+                - Path=/chat/**,/conversations/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    redis-rate-limiter.replenishRate: 20
+                    redis-rate-limiter.burstCapacity: 40
+                    redis-rate-limiter.requestedTokens: 1
+                    key-resolver: "#{@userKeyResolver}"
+                - name: CircuitBreaker
+                  args:
+                    name: chatCB
+                    fallbackUri: forward:/fallback
+            - id: chat-ws
+              uri: lb:ws://chat-service
+              predicates:
+                - Path=/ws/**
+            - id: history
+              uri: lb://history-service
+              predicates:
+                - Path=/history/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    redis-rate-limiter.replenishRate: 20
+                    redis-rate-limiter.burstCapacity: 40
+                    redis-rate-limiter.requestedTokens: 1
+                    key-resolver: "#{@userKeyResolver}"
+                - name: CircuitBreaker
+                  args:
+                    name: historyCB
+                    fallbackUri: forward:/fallback
+            - id: presence
+              uri: lb://presence-service
+              predicates:
+                - Path=/presence/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    redis-rate-limiter.replenishRate: 20
+                    redis-rate-limiter.burstCapacity: 40
+                    redis-rate-limiter.requestedTokens: 1
+                    key-resolver: "#{@userKeyResolver}"
+                - name: CircuitBreaker
+                  args:
+                    name: presenceCB
+                    fallbackUri: forward:/fallback
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+relay:
+  jwt:
+    secret: ${JWT_SECRET:relay-dev-secret-change-me-please-0123456789abcdef}
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: auth-service
+        url: /auth/v3/api-docs
+      - name: chat-service
+        url: /chat/v3/api-docs
+      - name: history-service
+        url: /history/v3/api-docs
+      - name: presence-service
+        url: /presence/v3/api-docs
+
+resilience4j:
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 2s
+        cancelRunningFuture: true
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.value}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,gateway
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    redis:
+      enabled: false
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://localhost:9411/api/v2/spans}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  data:
+    redis:
+      host: redis
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka:8761/eureka
+management:
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans

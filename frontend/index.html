@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Relay — distributed chat</title>
+  <link rel="stylesheet" href="style.css?v=3"/>
+</head>
+<body>
+  <div id="auth" class="auth">
+    <h1>Relay</h1>
+    <p class="sub">Distributed real-time chat · Java 21 · Spring Cloud · Kafka</p>
+    <div class="tabs">
+      <button id="tab-login" class="tab active">Login</button>
+      <button id="tab-register" class="tab">Register</button>
+    </div>
+    <form id="auth-form">
+      <input id="username" placeholder="username" autocomplete="username" required/>
+      <input id="email" type="email" placeholder="email (register only)" autocomplete="email"/>
+      <input id="password" type="password" placeholder="password" autocomplete="current-password" required/>
+      <button type="submit" id="auth-submit">Login</button>
+    </form>
+    <p id="auth-error" class="error"></p>
+  </div>
+
+  <div id="app" class="app hidden">
+    <aside class="sidebar">
+      <div class="me">
+        <span id="me-name"></span>
+        <button id="logout" title="Logout">⎋</button>
+      </div>
+      <div class="my-id" id="my-id" title="Click to copy your user ID — paste it into the other tab's 'peer user UUID' box">
+        ID: <span id="me-id"></span> ⧉
+      </div>
+      <div class="new-chat">
+        <input id="peer-id" placeholder="peer user UUID"/>
+        <button id="new-direct">+ 1:1</button>
+      </div>
+      <div class="new-chat">
+        <input id="group-name" placeholder="group name"/>
+        <input id="group-members" placeholder="member UUIDs, comma-sep"/>
+        <button id="new-group">+ Group</button>
+      </div>
+      <ul id="conversations"></ul>
+    </aside>
+
+    <main class="chat">
+      <header class="chat-header">
+        <div>
+          <span id="conv-title">Select a conversation</span>
+          <span id="peer-presence" class="presence"></span>
+        </div>
+        <div class="conn">
+          <span id="conn-state" class="dot offline"></span>
+          <span id="conn-label">disconnected</span>
+          <span id="instance-id" class="instance"></span>
+        </div>
+      </header>
+      <div id="messages" class="messages"></div>
+      <div id="typing" class="typing"></div>
+      <form id="compose" class="compose">
+        <input id="message-input" placeholder="Type a message…" autocomplete="off" disabled/>
+        <button type="submit" id="send-btn" disabled>Send</button>
+      </form>
+    </main>
+  </div>
+
+  <script src="app.js?v=3"></script>
+</body>
+</html>
